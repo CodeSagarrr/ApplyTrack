@@ -1,0 +1,1 @@
+{"version":3,"file":"match.d.ts","sourceRoot":"","sources":["../../../src/controllers/match/match.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,OAAO,EAAE,KAAK,QAAQ,EAAE,KAAK,YAAY,EAAe,MAAM,SAAS,CAAC;AAUtF,eAAO,MAAM,WAAW,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,EAAE,MAAM,YAAY,kBAuFhF,CAAA;AAED,eAAO,MAAM,aAAa,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,EAAE,MAAM,YAAY,4DAuDlF,CAAA"}
