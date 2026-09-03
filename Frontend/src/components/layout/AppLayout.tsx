@@ -26,7 +26,7 @@ const navigationItems = [
 function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <Link className="flex min-w-0 items-center gap-3" to="/">
-      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-applytrack-primary text-sm font-bold text-white ${compact ? "hidden" : "block"}`}>AT</span>
+      <img src="/favicon.png" alt="ApplyTrack logo" className={`h-10 w-10 ${compact ? "hidden" : "block"}`} />
       {!compact ? (
         <span className="min-w-0">
           <span className="block truncate font-heading text-sm font-semibold bg-applytrack-surface">ApplyTrack</span>

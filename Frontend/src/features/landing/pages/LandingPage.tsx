@@ -33,8 +33,8 @@ export default function LandingPage() {
     <main className="min-h-svh bg-white font-sans text-applytrack-ink">
       <nav className="sticky top-0 z-20 border-b border-[#E6E8F0] bg-white/95 px-4 backdrop-blur sm:px-6 lg:px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">
-          <Link className="flex items-center gap-3" to="/">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-applytrack-primary text-sm font-bold text-white">AT</span>
+          <Link className="flex items-center gap-2" to="/">
+            <img src="/favicon.png" alt="ApplyTrack logo" className="h-9 w-9" />
             <span className="font-heading text-sm font-semibold">ApplyTrack</span>
           </Link>
           <div className="hidden items-center gap-6 text-sm font-medium text-[#646378] md:flex">
