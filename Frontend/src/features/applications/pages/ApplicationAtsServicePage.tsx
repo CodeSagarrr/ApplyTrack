@@ -234,6 +234,10 @@ export default function ApplicationAtsServicePage() {
           type: "all",
         });
         queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
+        queryClient.invalidateQueries({
           queryKey: ["application", applicationId],
         });
       },
@@ -431,9 +435,6 @@ export default function ApplicationAtsServicePage() {
                           className="flex gap-3 rounded-lg border border-[#E1E3EC] bg-[#FAFBFF] p-3"
                           key={`${suggestion}-${index}`}
                         >
-                          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md bg-white text-xs font-semibold text-applytrack-primary shadow-sm">
-                            {index + 1}
-                          </span>
                           <p className="text-sm leading-6 text-[#343447]">
                             <SuggestionCard suggestion={suggestion} />
                           </p>

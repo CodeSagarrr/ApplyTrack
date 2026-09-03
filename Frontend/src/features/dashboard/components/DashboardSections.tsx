@@ -139,8 +139,8 @@ export function RecentApplications({
                 </tr>
               ))
             ) : (
-              <tr className="whitespace-nowrap px-5 py-4 font-semibold text-applytrack-ink">
-                <td>
+              <tr>
+                <td className="whitespace-nowrap px-5 py-4 font-semibold text-applytrack-ink">
                   <span className="font-semibold text-applytrack-ink">
                     No recent applications found.
                   </span>

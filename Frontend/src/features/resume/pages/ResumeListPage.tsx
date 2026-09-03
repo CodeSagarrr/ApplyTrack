@@ -1,16 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import {
-  CheckCircle2,
-  FileUp,
-  Plus,
-  ShieldCheck,
-} from "lucide-react";
+import { CheckCircle2, FileUp, Plus, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import type { AxiosError } from "axios";
-import {
-  PageHeader,
-  SurfaceCard,
-} from "../../../components/ui/PagePrimitives";
+import { PageHeader, SurfaceCard } from "../../../components/ui/PagePrimitives";
 import { appendFormData } from "../../../utils/HelperFunctions";
 import {
   deleteResumeMutation,
@@ -70,8 +62,6 @@ function VersionHealthCard({ resumes }: { resumes: ResumeProps[] }) {
   );
 }
 
-
-
 function RecommendedChecksCard() {
   return (
     <SurfaceCard className="p-5">
@@ -111,8 +101,7 @@ export default function ResumeListPage() {
 
   useMemo(() => {
     if (Resumes?.data) setResumes(Resumes.data);
-  }, [Resumes])
-
+  }, [Resumes]);
 
   function triggerFileInput() {
     if (!versionName.trim()) {
@@ -135,11 +124,14 @@ export default function ResumeListPage() {
           setVersionName("");
           setUploadProgress(0);
           setIsAnalyzing(false);
-          queryClient.invalidateQueries({ queryKey: ["resumes"] });
+          queryClient.invalidateQueries({ queryKey: ["resumes", "summary"] });
         },
         onError(error) {
           const err = error as AxiosError<{ message: string }>;
-          toast.error(err.response?.data.message || "Unable to upload resume. Please try again.");
+          toast.error(
+            err.response?.data.message ||
+              "Unable to upload resume. Please try again.",
+          );
           setUploadProgress(0);
           setIsAnalyzing(false);
         },
@@ -148,28 +140,34 @@ export default function ResumeListPage() {
     [uploadMutation],
   );
 
-  const handleDelete =
-    (id: string , force : boolean = false) => {
-      deleteMutation.mutate(
-        { id, force },
-        {
-          onSuccess() {
-            toast.success("Resume deleted successfully.");
-            queryClient.invalidateQueries({ queryKey: ["resumes"] });
-            setVisibleDeleteButton(false);
-          },
-          onError(error) {
-            const err = error as AxiosError<{ message: string }>;
-            toast.error(err.response?.data.message || "Unable to delete resume. Please try again.");
-            setUploadProgress(0);
-            if (err.status === 409) {
-              setVisibleDeleteButton(true);
-            }
-            setIsAnalyzing(false);
-          },
+  const handleDelete = (id: string, force: boolean = false) => {
+    deleteMutation.mutate(
+      { id, force },
+      {
+        onSuccess() {
+          toast.success("Resume deleted successfully.");
+          queryClient.invalidateQueries({ queryKey: ["resumes"] });
+          queryClient.invalidateQueries({
+            queryKey: ["summary"],
+            type: "all",
+          });
+          setVisibleDeleteButton(false);
         },
-      );
-    }
+        onError(error) {
+          const err = error as AxiosError<{ message: string }>;
+          toast.error(
+            err.response?.data.message ||
+              "Unable to delete resume. Please try again.",
+          );
+          setUploadProgress(0);
+          if (err.status === 409) {
+            setVisibleDeleteButton(true);
+          }
+          setIsAnalyzing(false);
+        },
+      },
+    );
+  };
 
   function handleFile(file?: File) {
     if (!file) return;
@@ -207,7 +205,10 @@ export default function ResumeListPage() {
       },
       onError(error) {
         const err = error as AxiosError<{ message: string }>;
-        toast.error(err.response?.data.message || "Unable to update default resume. Please try again.");
+        toast.error(
+          err.response?.data.message ||
+            "Unable to update default resume. Please try again.",
+        );
       },
     });
   }
@@ -297,7 +298,9 @@ export default function ResumeListPage() {
                   }
                   key={resume._id}
                   onCompare={() => toggleCompare(resume._id)}
-                  onDelete={(id : string, force : boolean) => handleDelete(id, force)}
+                  onDelete={(id: string, force: boolean) =>
+                    handleDelete(id, force)
+                  }
                   onSetDefault={() => handleUpdateStatus(resume._id)}
                   resume={resume}
                   selected={selectedCompareIds.includes(resume._id)}

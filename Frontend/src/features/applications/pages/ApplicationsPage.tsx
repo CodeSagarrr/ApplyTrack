@@ -146,6 +146,10 @@ export default function ApplicationsPage() {
           queryKey: ["applications"],
           type: "all",
         });
+        queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
       },
       onError(err) {
         const error = err as AxiosError<{ message: string }>;

@@ -169,6 +169,10 @@ export default function MatchToolPage() {
           queryKey: ["applications"],
           type: "all",
         });
+        queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
       },
       onError(error) {
         setActiveStep(1);

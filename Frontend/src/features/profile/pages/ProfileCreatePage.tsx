@@ -159,8 +159,9 @@ export function ProfileCreatePage() {
 
     Mutation.mutate(data as unknown as Parameters<typeof Mutation.mutate>[0], {
       onSuccess() {
-        toast.success("Profile updated successfully.")
+        toast.success("Profile updated successfully.");
       },
+      
       onError(error) {
         const err = error as AxiosError<{ message: string }>
         toast.error(err.response?.data.message || "Unable to update profile. Please try again.")

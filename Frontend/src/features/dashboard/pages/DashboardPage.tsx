@@ -23,6 +23,7 @@ import type {
   RecentApplicationsProps,
 } from "../../../types/ApiTypes";
 import { Link } from "react-router";
+import { getUser } from "../../../hooks/profile/useProfile";
 
 const quickActions = [
   { icon: CirclePlus, label: "Add Application" },
@@ -32,6 +33,7 @@ const quickActions = [
 
 export default function DashboardPage() {
   const { data, isLoading } = useGetSumary();
+  const { data : User } = getUser()
   const results = (data?.result as DashboardDataProps) ?? {};
   const recentApplications =
     (data?.result.recentApplications as RecentApplicationsProps[]) ?? [];
@@ -39,6 +41,9 @@ export default function DashboardPage() {
   if (isLoading) {
     <LoadingState />;
   }
+
+  console.log(User)
+  console.log(results)
 
   const metricCards = [
     {
@@ -75,7 +80,7 @@ export default function DashboardPage() {
     <div className="min-h-svh">
       <PageHeader
         eyebrow="Dashboard"
-        title="Good morning, Suraj."
+        title={`Good morning, ${User?.data.name ?? "User"} !`}
         description="Track applications, monitor match quality, and keep your resume readiness in view."
         actions={
           <>

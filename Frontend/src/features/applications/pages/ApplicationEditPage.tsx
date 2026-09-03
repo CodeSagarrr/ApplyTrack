@@ -208,7 +208,11 @@ export default function ApplicationEditPage() {
           queryKey: ["applications"],
           type: "all",
         });
-        // window.location.href = "/applications";
+        queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
+        window.location.href = "/applications";
       },
       onError(err) {
         const error = err as AxiosError<{ message: string }>;

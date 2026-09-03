@@ -102,6 +102,11 @@ export default function ApplicationFormPage() {
     event.preventDefault();
     event.stopPropagation();
 
+    if(formData.companyName === "" || formData.roleTitle === "" || formData.platForm === "" || formData.dateApplied === null){
+      toast.error("Please fill all the required fields.");
+      return;
+    }
+
     const result = selectedFields(formData);
 
     Mutation.mutate(result, {
@@ -111,6 +116,10 @@ export default function ApplicationFormPage() {
           queryKey : ["applications"],
           type : "all"
         })
+        queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
         navigate("/applications")
       },
       onError(err) {

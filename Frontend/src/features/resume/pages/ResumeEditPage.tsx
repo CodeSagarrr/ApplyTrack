@@ -68,6 +68,10 @@ export default function ResumeEditPage() {
         onSuccess() {
           toast.success("Resume updated successfully.");
           queryClient.invalidateQueries({ queryKey: ["resumes"] });
+          queryClient.invalidateQueries({
+          queryKey: ["summary"],
+          type: "all",
+        });
           navigate("/resumes");
         },
         onError(error) {
