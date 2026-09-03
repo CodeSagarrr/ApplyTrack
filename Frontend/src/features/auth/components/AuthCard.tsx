@@ -94,7 +94,7 @@ export const AuthCard = ({
             className=" cursor-pointer inline-flex h-10 min-w-45 items-center justify-between gap-2 rounded border border-[#dadce0] bg-white px-2 font-normal leading-5 shadow-none transition hover:bg-[#f8fafd] focus:outline-none focus:ring-2 focus:ring-[#1a73e8]/20"
             onClick={() => {
               window.location.href =
-                "http://localhost:8080/api/auth/github";
+                "https://applytrack-o4s5.onrender.com/api/auth/github";
             }}
           >
             <FaGithub className="h-5 w-5 text-[#24292f]" />
