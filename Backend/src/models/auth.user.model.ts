@@ -18,7 +18,7 @@ const RegisterSchema = new mongoose.Schema({
 
     passwordHash: {
         type: String,
-        required: function () {
+        required: function (this: { oauthProvider: string | null }) {
             return !this.oauthProvider;
         }
     },
