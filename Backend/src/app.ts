@@ -28,7 +28,7 @@ cloudinary.v2.config({
 })
 
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "https://apply-track-tau.vercel.app/",
     credentials: true,
     optionsSuccessStatus: 200
 }
