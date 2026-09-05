@@ -83,7 +83,7 @@ export function RecentApplications({
   recentApplications: RecentApplicationsProps[];
 }) {
   return (
-    <SurfaceCard>
+    <SurfaceCard className="overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-[#EEF0F5] p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-heading text-lg font-semibold">

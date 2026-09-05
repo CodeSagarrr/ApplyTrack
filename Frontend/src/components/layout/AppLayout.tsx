@@ -255,7 +255,7 @@ export function AppLayout() {
         <BrandMark />
         <button
           aria-label="Open navigation"
-          className="grid h-9 w-9 place-items-center rounded-lg border border-[#E1E3EC] bg-applytrack-ink"
+          className="grid h-9 w-9 place-items-center rounded-lg border border-[#E1E3EC] bg-applytrack-ink text-white"
           onClick={() => setDrawerOpen(true)}
           type="button"
         >

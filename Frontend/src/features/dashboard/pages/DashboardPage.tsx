@@ -42,9 +42,6 @@ export default function DashboardPage() {
     <LoadingState />;
   }
 
-  console.log(User)
-  console.log(results)
-
   const metricCards = [
     {
       icon: BriefcaseBusiness,
@@ -104,8 +101,8 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8">
-        <main className="space-y-5">
+      <div className="grid min-w-0 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8">
+        <main className="min-w-0 space-y-5">
           <MetricsSection metricCards={metricCards} />
           <RecentApplications recentApplications={recentApplications} />
           <div className="grid gap-5 xl:grid-cols-2">
@@ -117,7 +114,7 @@ export default function DashboardPage() {
           </div>
         </main>
 
-        <aside className="space-y-5">
+        <aside className="min-w-0 space-y-5">
           <QuickActions quickActions={quickActions} />
         </aside>
       </div>
