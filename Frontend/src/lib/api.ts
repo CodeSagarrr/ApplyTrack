@@ -86,6 +86,12 @@ export const login = async (payLoad: LoginProps) => {
   return data;
 };
 
+export const Logout = async () => {
+  const { data } = await api.post("/auth/logout" , { withCredentials : true });
+
+  return data;
+};
+
 export const googleLogin = async (credentialId: string) => {
   const { data } = await api.post("/auth/google", { token: credentialId });
 

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { getUser } from "../../hooks/profile/useProfile";
+import { useLogout } from "../../hooks/auth/useAuth";
+import { toast } from "react-hot-toast/headless";
 
 const navigationItems = [
   { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
@@ -153,8 +155,18 @@ function SidebarFooter({
 }
 
 function UserProfileModal({ user, onClose }: { user?: CurrentUser; onClose: () => void }) {
+  const logoutMutation = useLogout();
   const displayName = user?.name?.trim() || "User";
   const displayEmail = user?.email?.trim() || "No email available";
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.success("Logged out successfully");
+        window.location.href = "/login";
+      }
+    });
+  };
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-applytrack-ink/35 px-4 py-6 backdrop-blur-sm">
@@ -197,6 +209,7 @@ function UserProfileModal({ user, onClose }: { user?: CurrentUser; onClose: () =
         <button
           className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#FCA5A5] bg-white px-4 text-sm font-semibold text-[#DC2626] transition hover:bg-[#FEF2F2]"
           type="button"
+          onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />
           Logout
