@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { Application } from "../../models/application.model.js";
 import type { AuthUserId } from "../../types/controllerTypes.js";
-import  ApiError  from "../../utils/ApiError.js"
+import ApiError from "../../utils/ApiError.js";
 import mongoose from "mongoose";
 
 const now = new Date();
@@ -110,7 +110,7 @@ export const GetMatrixData = async (
                 roleTitle: 1,
                 status: 1,
                 createdAt: 1,
-                "matchScore": "$matchResultData.matchScore",
+                matchScore: "$matchResultData.matchScore",
               },
             },
           ],
@@ -125,6 +125,29 @@ export const GetMatrixData = async (
           ],
 
           totalApplications: [{ $count: "count" }],
+
+          applicationsPerMonth: [
+            {
+              $match: {
+                dateApplied: { $exists: true, $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  year: { $year: "$dateApplied" },
+                  month: { $month: "$dateApplied" },
+                },
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $sort: {
+                "_id.year": 1,
+                "_id.month": 1,
+              },
+            },
+          ],
         },
       },
     ]);
@@ -147,8 +170,14 @@ export const GetMatrixData = async (
 
     const totalApplications = data.totalApplications?.[0]?.count ?? 0;
 
-    const recentApplications = data.recentApplications ?? []
-    const pipeline = data.pipeline ?? []
+    const recentApplications = data.recentApplications ?? [];
+    const pipeline = data.pipeline ?? [];
+    const applicationsPerMonth = data.applicationsPerMonth.map((item : { _id: { year: number; month: number }; count: number }) => ({
+      month: new Date(item._id.year, item._id.month - 1).toLocaleString("en-US", {
+        month: "short",
+      }),
+      count: item.count,
+    }));
 
     const result = {
       activeApplications,
@@ -158,7 +187,8 @@ export const GetMatrixData = async (
       interviewApplications,
       totalApplications,
       recentApplications,
-      pipeline
+      pipeline,
+      applicationsPerMonth,
     };
 
     return res.status(200).json({

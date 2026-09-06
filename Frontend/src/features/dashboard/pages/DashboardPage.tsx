@@ -3,16 +3,14 @@ import {
   CirclePlus,
   FileSearch,
   Gauge,
-  Sparkles,
   TrendingUp,
-  Upload,
 } from "lucide-react";
 import { PageHeader } from "../../../components/ui/PagePrimitives";
 import {
   ApplicationPipeline,
+  DashboardCharts,
   AtsScoreOverview,
   MetricsSection,
-  QuickActions,
   RecentApplications,
 } from "../components/DashboardSections";
 import { useGetSumary } from "../../../hooks/dashboard/useFetch";
@@ -25,12 +23,6 @@ import type {
 import { Link } from "react-router";
 import { getUser } from "../../../hooks/profile/useProfile";
 
-const quickActions = [
-  { icon: CirclePlus, label: "Add Application" },
-  { icon: Upload, label: "Upload Resume" },
-  { icon: Sparkles, label: "Run Match Check" },
-];
-
 export default function DashboardPage() {
   const { data, isLoading } = useGetSumary();
   const { data : User } = getUser()
@@ -38,6 +30,7 @@ export default function DashboardPage() {
   const recentApplications =
     (data?.result.recentApplications as RecentApplicationsProps[]) ?? [];
   const pipelineStages = (data?.result.pipeline as IPipeline[]) ?? [];
+  const applicationsPerMonth = (data?.result.applicationsPerMonth as { month: string; count: number }[]) ?? [];
   if (isLoading) {
     <LoadingState />;
   }
@@ -101,23 +94,18 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid min-w-0 gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8">
-        <main className="min-w-0 space-y-5">
-          <MetricsSection metricCards={metricCards} />
-          <RecentApplications recentApplications={recentApplications} />
-          <div className="grid gap-5 xl:grid-cols-2">
-            <ApplicationPipeline pipelineStages={pipelineStages} />
-            <AtsScoreOverview
-              matchScore={results.averageMatchScore}
-              totalApplications={results.totalApplications}
-            />
-          </div>
-        </main>
-
-        <aside className="min-w-0 space-y-5">
-          <QuickActions quickActions={quickActions} />
-        </aside>
-      </div>
+      <main className="min-w-0 space-y-5 px-4 py-5 sm:px-6 lg:px-8">
+        <MetricsSection metricCards={metricCards} />
+        <RecentApplications recentApplications={recentApplications} />
+        <div className="grid gap-5 xl:grid-cols-2">
+          <ApplicationPipeline pipelineStages={pipelineStages} />
+          <AtsScoreOverview
+            matchScore={results.averageMatchScore}
+            totalApplications={results.totalApplications}
+          />
+        </div>
+        <DashboardCharts pipelineStages={pipelineStages} applicationsPerMonth={applicationsPerMonth} />
+      </main>
     </div>
   );
 }
