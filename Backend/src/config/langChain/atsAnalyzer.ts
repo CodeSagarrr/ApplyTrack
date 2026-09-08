@@ -71,8 +71,8 @@ Return exactly this JSON structure:
   ],
   "atsIssues": [
     {{
-      "severity": "LOW",
-      "category": "Skills",
+      "severity": "LOW" | "MEDIUM" | "HIGH",
+      "category": "",
       "message": ""
     }}
   ]

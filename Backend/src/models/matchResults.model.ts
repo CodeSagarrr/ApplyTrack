@@ -9,8 +9,7 @@ const AtsIssues = {
     },
     category: {
         type: String,
-        enum: ["Formatting", "Keywords", "Experience", "Skills", "Education", "Projects"],
-        default: "Formatting"
+        default: ""
     },
     message: {
         type: String,
