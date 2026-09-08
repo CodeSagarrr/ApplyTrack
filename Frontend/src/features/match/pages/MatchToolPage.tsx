@@ -110,12 +110,14 @@ export default function MatchToolPage() {
 
   useEffect(() => {
   if (matchState === "COMPLETED" || matchState === "FAILED") {
+    setActiveStep(2)
     setIsMatchRunning(false);
   }
 }, [matchState]);
 
   useEffect(() => {
     if (matchState === "FAILED") {
+      setActiveStep(2)
       toast.error("Match analysis failed. Please try again.");
       return;
     }
@@ -165,6 +167,7 @@ export default function MatchToolPage() {
     Mutation.mutate(payLoad, {
       onSuccess(data) {
         setJobId(data?.data.jobId);
+        setActiveStep(1)
         queryClient.invalidateQueries({
           queryKey: ["applications"],
           type: "all",
