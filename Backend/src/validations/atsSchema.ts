@@ -29,7 +29,7 @@ export const AtsSchema = z.object({
                 "Skills",
                 "Education",
                 "Projects"
-            ]),
+            ]).optional(),
             message: z.string()
         })
     )
