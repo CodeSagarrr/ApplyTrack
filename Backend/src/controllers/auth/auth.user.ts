@@ -17,7 +17,7 @@ interface Token extends Request {
 const cookiesOption = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
+  sameSite: "none" as const,
 };
 
 export const register = async (
