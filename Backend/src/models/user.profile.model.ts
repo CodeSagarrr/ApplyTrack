@@ -96,4 +96,6 @@ const UserProfileSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+UserProfileSchema.index({ user: 1 }, { unique: true });
+
 export const UserProfile = mongoose.model("profile" , UserProfileSchema)
