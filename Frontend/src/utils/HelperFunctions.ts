@@ -1,25 +1,28 @@
-export const BuildSearchParams = (filtersParams : Record<string , unknown>) => {
-    const searchParams = new URLSearchParams();
+export const BuildSearchParams = (filtersParams: Record<string, unknown>) => {
+  const searchParams = new URLSearchParams();
 
-    Object.entries(filtersParams).forEach(([key , value]) => {
-        if(value !== undefined && value !== null && value !== ""){
-            searchParams.append(key , String(value))
-        }
-    });
+  Object.entries(filtersParams).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      searchParams.append(key, String(value));
+    }
+  });
 
-    return searchParams;
-}
+  return searchParams;
+};
 
 export const getDate = (dateFilters: string) => {
   if (dateFilters === "Any date") {
     return { from: undefined, to: undefined };
   }
   const days = Number(dateFilters.match(/\d+/)?.[0]);
-    if (!days || Number.isNaN(days)) {
+  if (!days || Number.isNaN(days)) {
     return { from: undefined, to: undefined };
   }
   const start = new Date();
   const end = new Date();
+
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
 
   start.setDate(end.getDate() - days);
 
@@ -28,7 +31,6 @@ export const getDate = (dateFilters: string) => {
     to: end.toISOString(),
   };
 };
-
 
 export function isEmpty(value: any): boolean {
   if (value == null) return true;
@@ -69,7 +71,6 @@ export function appendFormData(
   });
 }
 
-
 export function selectedFields(obj: Object) {
   const newSelectedFields: any = {};
 
@@ -92,4 +93,3 @@ export function formatDate(date?: string) {
     year: "numeric",
   });
 }
-
