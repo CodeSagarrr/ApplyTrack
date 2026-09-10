@@ -144,11 +144,10 @@ export const getFiltersApplication = async (
     }
 
     if (search) {
-      // filters.$or = [
-      //   { companyName: { $regex: search, $options: "i" } },
-      //   { roleTitle: { $regex: search, $options: "i" } },
-      // ];
-      filters.$text = { $search: search as string };
+      filters.$or = [
+        { companyName: { $regex: search, $options: "i" } },
+        { roleTitle: { $regex: search, $options: "i" } },
+      ];
     }
 
     if (from || to) {
