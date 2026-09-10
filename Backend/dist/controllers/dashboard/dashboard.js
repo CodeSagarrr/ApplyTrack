@@ -92,7 +92,7 @@ export const GetMatrixData = async (req, res, next) => {
                                 roleTitle: 1,
                                 status: 1,
                                 createdAt: 1,
-                                "matchScore": "$matchResultData.matchScore",
+                                matchScore: "$matchResultData.matchScore",
                             },
                         },
                     ],
@@ -105,6 +105,28 @@ export const GetMatrixData = async (req, res, next) => {
                         },
                     ],
                     totalApplications: [{ $count: "count" }],
+                    applicationsPerMonth: [
+                        {
+                            $match: {
+                                dateApplied: { $exists: true, $ne: null },
+                            },
+                        },
+                        {
+                            $group: {
+                                _id: {
+                                    year: { $year: "$dateApplied" },
+                                    month: { $month: "$dateApplied" },
+                                },
+                                count: { $sum: 1 },
+                            },
+                        },
+                        {
+                            $sort: {
+                                "_id.year": 1,
+                                "_id.month": 1,
+                            },
+                        },
+                    ],
                 },
             },
         ]);
@@ -119,6 +141,12 @@ export const GetMatrixData = async (req, res, next) => {
         const totalApplications = data.totalApplications?.[0]?.count ?? 0;
         const recentApplications = data.recentApplications ?? [];
         const pipeline = data.pipeline ?? [];
+        const applicationsPerMonth = data.applicationsPerMonth.map((item) => ({
+            month: new Date(item._id.year, item._id.month - 1).toLocaleString("en-US", {
+                month: "short",
+            }),
+            count: item.count,
+        }));
         const result = {
             activeApplications,
             applicationsThisMonth,
@@ -127,7 +155,8 @@ export const GetMatrixData = async (req, res, next) => {
             interviewApplications,
             totalApplications,
             recentApplications,
-            pipeline
+            pipeline,
+            applicationsPerMonth,
         };
         return res.status(200).json({
             success: true,

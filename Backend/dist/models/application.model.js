@@ -4,10 +4,12 @@ const ApplicationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "users",
         required: true,
+        index: true
     },
     resume: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "resumes",
+        index: true
     },
     companyName: {
         type: String,
@@ -70,7 +72,12 @@ const ApplicationSchema = new mongoose.Schema({
     matchResult: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "matchresults",
+        index: true
     },
 }, { timestamps: true });
+// Inside your Application Schema file
+ApplicationSchema.index({ companyName: "text", roleTitle: "text" });
+ApplicationSchema.index({ user: 1, status: 1, _id: -1 });
+ApplicationSchema.index({ user: 1, dateApplied: 1, _id: -1 });
 export const Application = mongoose.model("applications", ApplicationSchema);
 //# sourceMappingURL=application.model.js.map

@@ -12,8 +12,8 @@ export declare const aiAtsService: (parsedText: string, jd_text: string) => Prom
     }[];
     atsIssues: {
         severity: "LOW" | "MEDIUM" | "HIGH";
-        category: "Formatting" | "Keywords" | "Experience" | "Skills" | "Education" | "Projects";
         message: string;
+        category?: string | undefined;
     }[];
 }>;
 //# sourceMappingURL=atsAnalyzer.d.ts.map

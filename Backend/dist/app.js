@@ -23,14 +23,18 @@ cloudinary.v2.config({
     secure: true,
 });
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL || "https://apply-track-tau.vercel.app",
     credentials: true,
     optionsSuccessStatus: 200
 };
+app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "ok" });
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/v1", applicationRoutes);

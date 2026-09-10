@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { User } from "../../models/auth.user.model.js";
 import ApiError from "../../utils/ApiError.js";
-import { generateAccesToken, generateRefreshToken } from "../../utils/generateTokens.js";
+import { generateAccesToken, generateRefreshToken, } from "../../utils/generateTokens.js";
 import { OAuth2Client } from "google-auth-library";
 import JWT from "jsonwebtoken";
 import axios from "axios";
@@ -20,7 +20,7 @@ export const register = async (req, res, next) => {
         const newUser = new User({
             name,
             email,
-            passwordHash: password
+            passwordHash: password,
         });
         const accesstoken = generateAccesToken(newUser._id.toString());
         const refreshtoken = generateRefreshToken(newUser._id.toString());
@@ -29,13 +29,14 @@ export const register = async (req, res, next) => {
         await newUser.save();
         return res.status(201).json({
             success: true,
-            message: "User registered successfully", data: {
+            message: "User registered successfully",
+            data: {
                 id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
                 planTier: newUser.planTier,
-                accessToken: accesstoken
-            }
+                accessToken: accesstoken,
+            },
         });
     }
     catch (error) {
@@ -58,8 +59,15 @@ export const login = async (req, res, next) => {
         const hashedRefreshToken = await bcrypt.hash(refreshtoken, 10);
         existingUser.refreshToken = hashedRefreshToken;
         await existingUser.save();
-        return res.cookie("accessToken", accesstoken, { ...cookiesOption, maxAge: 15 * 60 * 1000 })
-            .cookie("refreshToken", refreshtoken, { ...cookiesOption, maxAge: 7 * 24 * 60 * 60 * 1000 })
+        return res
+            .cookie("accessToken", accesstoken, {
+            ...cookiesOption,
+            maxAge: 15 * 60 * 1000,
+        })
+            .cookie("refreshToken", refreshtoken, {
+            ...cookiesOption,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
             .json({ success: true, message: "Token refreshed" });
     }
     catch (error) {
@@ -88,8 +96,15 @@ export const Refresh = async (req, res, next) => {
         const hashedRefreshToken = await bcrypt.hash(refreshtoken, 10);
         user.refreshToken = hashedRefreshToken;
         await user.save();
-        return res.cookie("accessToken", accesstoken, { ...cookiesOption, maxAge: 15 * 60 * 1000 })
-            .cookie("refreshToken", refreshtoken, { ...cookiesOption, maxAge: 7 * 24 * 60 * 60 * 1000 })
+        return res
+            .cookie("accessToken", accesstoken, {
+            ...cookiesOption,
+            maxAge: 15 * 60 * 1000,
+        })
+            .cookie("refreshToken", refreshtoken, {
+            ...cookiesOption,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
             .json({ success: true, message: "Token refreshed" });
     }
     catch (error) {
@@ -104,7 +119,8 @@ export const Logout = async (req, res) => {
     if (refreshToken) {
         await User.updateOne({ refreshToken }, { $unset: { refreshToken: 1 } });
     }
-    return res.clearCookie("accessToken", cookiesOption)
+    return res
+        .clearCookie("accessToken", cookiesOption)
         .clearCookie("refreshToken", cookiesOption)
         .json({ success: true, message: "Logout successfully" });
 };
@@ -115,7 +131,7 @@ export const GoogleLogin = async (req, res, next) => {
         const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID
+            audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payLoad = ticket.getPayload();
         let user = await User.findOne({ email: payLoad?.email });
@@ -138,8 +154,15 @@ export const GoogleLogin = async (req, res, next) => {
         const hashedRefreshToken = await bcrypt.hash(refreshtoken, 10);
         user.refreshToken = hashedRefreshToken;
         await user.save();
-        return res.cookie("accessToken", accesstoken, { ...cookiesOption, maxAge: 15 * 60 * 1000 })
-            .cookie("refreshToken", refreshtoken, { ...cookiesOption, maxAge: 7 * 24 * 60 * 60 * 1000 })
+        return res
+            .cookie("accessToken", accesstoken, {
+            ...cookiesOption,
+            maxAge: 15 * 60 * 1000,
+        })
+            .cookie("refreshToken", refreshtoken, {
+            ...cookiesOption,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
             .json({ success: true, data: user });
     }
     catch (error) {
@@ -180,7 +203,7 @@ export const GithubLoginCallback = async (req, res, next) => {
         // Fetch profile & email simultaneously
         const [{ data: githubUser }, { data: emails }] = await Promise.all([
             axios.get("https://api.github.com/user", { headers }),
-            axios.get("https://api.github.com/user/emails", { headers })
+            axios.get("https://api.github.com/user/emails", { headers }),
         ]);
         const primaryEmail = emails.find((email) => email.primary && email.verified);
         if (!primaryEmail) {
@@ -191,8 +214,7 @@ export const GithubLoginCallback = async (req, res, next) => {
         });
         if (!user) {
             user = await User.create({
-                name: githubUser.name ??
-                    githubUser.login,
+                name: githubUser.name ?? githubUser.login,
                 email: primaryEmail.email,
                 profileImage: githubUser.avatar_url,
                 oauthProvider: "github",
@@ -201,10 +223,8 @@ export const GithubLoginCallback = async (req, res, next) => {
         }
         else {
             user.oauthProvider = "github";
-            user.oauthId =
-                githubUser.id.toString();
-            user.profileImage =
-                githubUser.avatar_url;
+            user.oauthId = githubUser.id.toString();
+            user.profileImage = githubUser.avatar_url;
         }
         const accessToken = generateAccesToken(user._id.toString());
         const refreshToken = generateRefreshToken(user._id.toString());

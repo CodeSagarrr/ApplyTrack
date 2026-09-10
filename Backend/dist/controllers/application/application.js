@@ -4,6 +4,7 @@ import { runAnalysis } from "../../service/ats-service.js";
 import { Resume } from "../../models/resume.model.js";
 import { aiAtsService } from "../../config/langChain/atsAnalyzer.js";
 import { MatchResult } from "../../models/matchResults.model.js";
+import mongoose from "mongoose";
 export const createApplication = async (req, res, next) => {
     try {
         const { userId } = req;
@@ -61,7 +62,8 @@ export const getAllApplications = async (req, res, next) => {
         const { userId } = req;
         const response = await Application.find({ user: userId })
             .select("id companyName roleTitle status platForm salary_range dateApplied createdAt updatedAt contact")
-            .populate("resume", "id fileName ats_score");
+            .populate("resume", "id fileName ats_score").
+            lean();
         return res.status(200).json({
             success: true,
             data: response,
@@ -78,19 +80,20 @@ export const getFiltersApplication = async (req, res, next) => {
         const { status, from, to, search, cursor } = req.query;
         const limit = 5;
         const filters = {
-            user: userId,
+            user: new mongoose.Types.ObjectId(userId),
         };
         if (cursor) {
-            filters._id = { $lt: cursor };
+            filters._id = { $lt: new mongoose.Types.ObjectId(cursor) };
         }
         if (status) {
             filters.status = status;
         }
         if (search) {
-            filters.$or = [
-                { companyName: { $regex: search, $options: "i" } },
-                { roleTitle: { $regex: search, $options: "i" } },
-            ];
+            // filters.$or = [
+            //   { companyName: { $regex: search, $options: "i" } },
+            //   { roleTitle: { $regex: search, $options: "i" } },
+            // ];
+            filters.$text = { $search: search };
         }
         if (from || to) {
             filters.dateApplied = {};
@@ -99,12 +102,50 @@ export const getFiltersApplication = async (req, res, next) => {
             if (to)
                 filters.dateApplied.$lte = new Date(to);
         }
-        const filtersApplications = await Application.find(filters)
-            .limit(Number(limit))
-            .sort({ _id: -1 })
-            .select("id companyName roleTitle status platForm salary_range dateApplied createdAt updatedAt contact location notes")
-            .populate("resume", "id fileName ats_score")
-            .populate("matchResult", "matchScore");
+        const pipeline = [
+            { $match: filters },
+            { $sort: { _id: -1 } },
+            { $limit: Number(limit + 1) },
+            {
+                $project: {
+                    _id: 1,
+                    companyName: 1,
+                    roleTitle: 1,
+                    status: 1,
+                    platForm: 1,
+                    salary_range: 1,
+                    dateApplied: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    contact: 1,
+                    location: 1,
+                    notes: 1,
+                    resume: 1,
+                    matchResult: 1,
+                },
+            },
+            {
+                $lookup: {
+                    from: "resumes",
+                    localField: "resume",
+                    foreignField: "_id",
+                    pipeline: [{ $project: { fileName: 1, ats_score: 1 } }],
+                    as: "resume",
+                },
+            },
+            {
+                $lookup: {
+                    from: "matchresults",
+                    localField: "matchResult",
+                    foreignField: "_id",
+                    pipeline: [{ $project: { matchScore: 1 } }],
+                    as: "matchResult",
+                },
+            },
+            { $unwind: { path: "$resume", preserveNullAndEmptyArrays: true } },
+            { $unwind: { path: "$matchResult", preserveNullAndEmptyArrays: true } },
+        ];
+        const filtersApplications = await Application.aggregate(pipeline);
         if (!filtersApplications || filtersApplications.length === 0) {
             throw new ApiError(404, "Not found!");
         }
@@ -132,8 +173,11 @@ export const getSpecificApplication = async (req, res, next) => {
         const { applicationId } = req.params;
         const { userId } = req;
         const application = await Application.findById({ _id: applicationId })
-            .populate("resume", "id fileName ats_score")
-            .populate("matchResult", "matchScore");
+            .populate([
+            { path: "resume", select: "id fileName ats_score" },
+            { path: "matchResult", select: "matchScore" }
+        ])
+            .lean();
         if (!application) {
             throw new ApiError(404, "Application dosen't exist!");
         }

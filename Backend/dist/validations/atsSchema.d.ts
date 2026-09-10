@@ -15,14 +15,7 @@ export declare const AtsSchema: z.ZodObject<{
             MEDIUM: "MEDIUM";
             HIGH: "HIGH";
         }>;
-        category: z.ZodEnum<{
-            Formatting: "Formatting";
-            Keywords: "Keywords";
-            Experience: "Experience";
-            Skills: "Skills";
-            Education: "Education";
-            Projects: "Projects";
-        }>;
+        category: z.ZodOptional<z.ZodString>;
         message: z.ZodString;
     }, z.z.core.$strip>>;
 }, z.z.core.$strip>;

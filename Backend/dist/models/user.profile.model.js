@@ -93,5 +93,6 @@ const UserProfileSchema = new mongoose.Schema({
         default: Date.now
     }
 }, { timestamps: true });
+UserProfileSchema.index({ user: 1 }, { unique: true });
 export const UserProfile = mongoose.model("profile", UserProfileSchema);
 //# sourceMappingURL=user.profile.model.js.map

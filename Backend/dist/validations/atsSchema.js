@@ -15,14 +15,7 @@ export const AtsSchema = z.object({
             "MEDIUM",
             "HIGH"
         ]),
-        category: z.enum([
-            "Formatting",
-            "Keywords",
-            "Experience",
-            "Skills",
-            "Education",
-            "Projects"
-        ]),
+        category: z.string().optional(),
         message: z.string()
     }))
 });
