@@ -220,11 +220,11 @@ export const deleteResume = async (
     });
 
 
-    if (isExistInApplication && force === "false") {
+    if (isExistInApplication.length > 0 && force === "false") {
       throw new ApiError(409, `Resume is being used by ${isExistInApplication.length} application!`);
     }
 
-    if (isExistInApplication && force === "true") {
+    if (isExistInApplication.length > 0 && force === "true") {
       await Application.updateMany(
         { resume: id as string, user: userId },
         { $set: { resume: null } },
