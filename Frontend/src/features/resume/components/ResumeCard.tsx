@@ -20,17 +20,16 @@ function formatDate(value: string) {
 
 export function ResumeCard({
   resume,
-  selected,
   visibleDeleteButton,
+  selectVisibleDeleteButton,
   onDelete,
   onSetDefault,
   isSetDefaultPending,
   isDeleteing,
 }: {
   resume: ResumeProps;
-  selected: boolean;
+  selectVisibleDeleteButton: boolean;
   visibleDeleteButton: boolean;
-  onCompare: () => void;
   onDelete: (id: string, force: boolean) => void;
   onSetDefault: () => void;
   isSetDefaultPending: () => boolean;
@@ -38,11 +37,7 @@ export function ResumeCard({
 }) {
   return (
     <article
-      className={`group rounded-lg border bg-white p-4 shadow-sm shadow-applytrack-ink/3 transition duration-200 hover:-translate-y-0.5 hover:border-applytrack-outline hover:shadow-md ${
-        selected
-          ? "border-applytrack-primary ring-4 ring-applytrack-primary/10"
-          : "border-[#E1E3EC]"
-      }`}
+      className={`group rounded-lg border bg-white p-4 shadow-sm shadow-applytrack-ink/3 transition duration-200 hover:-translate-y-0.5 hover:border-applytrack-outline hover:shadow-md border-[#E1E3EC]`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3">
@@ -77,7 +72,7 @@ export function ResumeCard({
           ) : null}
         </div>
         <div className="flex items-center gap-1">
-          {visibleDeleteButton ? (
+          {visibleDeleteButton && selectVisibleDeleteButton ? (
             <button
               className=" flex items-center justify-center gap-2 h-9 w-38 rounded-lg border border-[#E1E3EC] text-sm font-semibold text-[#424245] transition hover:border-[#f69797] hover:text-[#DC2626]"
               onClick={() => onDelete(resume._id, true)}

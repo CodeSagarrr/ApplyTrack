@@ -92,7 +92,6 @@ export default function ResumeListPage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const versionNameRef = useRef<HTMLInputElement | null>(null);
   const [resumes, setResumes] = useState<ResumeProps[]>([]);
-  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [versionName, setVersionName] = useState("");
@@ -124,7 +123,8 @@ export default function ResumeListPage() {
           setVersionName("");
           setUploadProgress(0);
           setIsAnalyzing(false);
-          queryClient.invalidateQueries({ queryKey: ["resumes", "summary"] });
+          queryClient.invalidateQueries({ queryKey: ["resumes"] });
+          queryClient.invalidateQueries({ queryKey: ["summary"] , type : "all" });
         },
         onError(error) {
           const err = error as AxiosError<{ message: string }>;
@@ -213,13 +213,6 @@ export default function ResumeListPage() {
     });
   }
 
-  function toggleCompare(id: string) {
-    setSelectedCompareIds((current) => {
-      if (current.includes(id)) return current.filter((item) => item !== id);
-      return [...current.slice(-1), id];
-    });
-  }
-
   return (
     <div className="min-h-svh">
       <PageHeader
@@ -297,13 +290,12 @@ export default function ResumeListPage() {
                     updateMutation.isPending
                   }
                   key={resume._id}
-                  onCompare={() => toggleCompare(resume._id)}
                   onDelete={(id: string, force: boolean) =>
                     handleDelete(id, force)
                   }
                   onSetDefault={() => handleUpdateStatus(resume._id)}
                   resume={resume}
-                  selected={selectedCompareIds.includes(resume._id)}
+                  selectVisibleDeleteButton={resume._id === deleteMutation.variables?.id}
                 />
               ))}
             </div>
