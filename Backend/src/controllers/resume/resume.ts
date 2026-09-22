@@ -199,8 +199,10 @@ export const deleteResume = async (
 ) => {
   try {
     const { userId } = req as AuthUserId;
-    const { id } = req.params;
+    const { id } = req.params as { id : string };
     const { force } = req.query
+
+    const shouldForce = force === "true";
 
     const isExistResume = await Resume.findById(id);
 
@@ -212,27 +214,27 @@ export const deleteResume = async (
       throw new ApiError(403, "Unauthorized.");
     }
 
-    const isExistInApplication = await Application.find({
-      resume: id as string,
+    const isExistInApplication = await Application.countDocuments({
+      resume : id!,
+      user: userId as string,
       status: {
         $in: ["Applied", "Screening", "Interview", "Offer"],
       },
-    });
+    })
 
-
-    if (isExistInApplication.length > 0 && force === "false") {
-      throw new ApiError(409, `Resume is being used by ${isExistInApplication.length} application!`);
+    if (isExistInApplication > 0 && !shouldForce) {
+      throw new ApiError(409, `Resume is being used by ${isExistInApplication} application(s)!`);
     }
 
-    if (isExistInApplication.length > 0 && force === "true") {
+    if (isExistInApplication > 0 && shouldForce) {
       await Application.updateMany(
-        { resume: id as string, user: userId },
+        { resume: id!, user: userId },
         { $set: { resume: null } },
         { runValidators: true },
       );
     }
 
-    const [cloudinaryResult, deletedResume] = await Promise.all([
+    const [cloudinaryResult , _] = await Promise.all([
       deleteFromCloudinary(isExistResume.public_id),
       Resume.findByIdAndDelete(id),
     ]);
@@ -241,7 +243,7 @@ export const deleteResume = async (
       throw new ApiError(500, "Failed to delete file from Cloudinary.");
     }
 
-    return res.status(200).json({
+    return res.status(204).json({
       success: true,
       message: "Resume deleted successfully!",
     });
