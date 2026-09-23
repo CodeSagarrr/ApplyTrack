@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { Application } from "../../models/application.model.js";
 import type { AuthUserId } from "../../types/controllerTypes.js";
-import ApiError from "../../utils/ApiError.js";
 import mongoose from "mongoose";
 
 const now = new Date();
@@ -89,6 +88,10 @@ export const GetMatrixData = async (
             {
               $match: {
                 status: "Interview",
+                createdAt : {
+                  $gt : startDate,
+                  $lt : endDate
+                }
               },
             },
             { $count: "count" },

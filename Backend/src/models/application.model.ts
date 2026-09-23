@@ -81,8 +81,8 @@ const ApplicationSchema = new mongoose.Schema(
 );
 
 // Inside your Application Schema file
+ApplicationSchema.index({ companyName: "text", roleTitle: "text", location: "text", contact: "text" });
 ApplicationSchema.index({ user: 1, status: 1, _id: -1 });
 ApplicationSchema.index({ user: 1, dateApplied: 1, _id: -1 });
-
 
 export const Application = mongoose.model("applications", ApplicationSchema);

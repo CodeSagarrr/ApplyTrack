@@ -51,8 +51,7 @@ export const createApplication = async (
 
     const existingApplication = await Application.findOne({
       user: userId,
-      companyName: { $regex: `^${companyName}$`, $options: "i" },
-      roleTitle: { $regex: `^${roleTitle}$`, $options: "i" },
+      $text: { $search: `"${companyName}" "${roleTitle}"` },
     });
 
     if (existingApplication) {
@@ -108,8 +107,8 @@ export const getAllApplications = async (
       .select(
         "id companyName roleTitle status platForm salary_range dateApplied createdAt updatedAt contact",
       )
-      .populate("resume", "id fileName ats_score").
-      lean();
+      .populate("resume", "id fileName ats_score")
+      .lean();
 
     return res.status(200).json({
       success: true,
@@ -129,7 +128,7 @@ export const getFiltersApplication = async (
   try {
     const { userId } = req as AuthUserId;
     const { status, from, to, search, cursor } = req.query;
-    const limit = 5;
+    const limit = 3;
 
     const filters: QueryFilter<IQueryFilters> = {
       user: new mongoose.Types.ObjectId(userId),
@@ -144,10 +143,7 @@ export const getFiltersApplication = async (
     }
 
     if (search) {
-      filters.$or = [
-        { companyName: { $regex: search, $options: "i" } },
-        { roleTitle: { $regex: search, $options: "i" } },
-      ];
+      filters.$text = { $search: search as string };
     }
 
     if (from || to) {
@@ -156,6 +152,7 @@ export const getFiltersApplication = async (
       if (from) filters.dateApplied.$gte = new Date(from as string);
       if (to) filters.dateApplied.$lte = new Date(to as string);
     }
+    
 
     const pipeline: any[] = [
       { $match: filters },
@@ -212,12 +209,12 @@ export const getFiltersApplication = async (
       filtersApplications.pop();
     }
     const cursorId =
-      filtersApplications && filtersApplications.length > 0 && hasNextPage
+      filtersApplications.length > 0 && hasNextPage
         ? filtersApplications[filtersApplications.length - 1]?._id
         : null;
 
     return res.status(200).json({
-      success: true,
+      startCursorId: filtersApplications[0]?._id,
       data: filtersApplications,
       cursorId,
       hasNextPage,
@@ -240,7 +237,7 @@ export const getSpecificApplication = async (
     const application = await Application.findById({ _id: applicationId })
       .populate([
         { path: "resume", select: "id fileName ats_score" },
-        { path: "matchResult", select: "matchScore" }
+        { path: "matchResult", select: "matchScore" },
       ])
       .lean();
 
