@@ -97,8 +97,6 @@ export default function ApplicationsPage() {
 
   const { data: filteredApplication , isLoading} = useGetFiltersQuery(queryFilter);
 
-  console.log("filteredApplication", filteredApplication);
-
   useMemo(() => {
     setApplications(
       filteredApplication?.pages.flatMap((page) => page.data ?? []) ?? [],
