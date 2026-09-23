@@ -72,7 +72,6 @@ const initialParamsFilters = {
 export default function ApplicationsPage() {
   const navigate = useNavigate();
   const deleteMutation = deleteApplicationMutation();
-  const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<"kanban" | "list">("list");
   const [applications, setApplications] = useState<Application[]>([]);
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -96,20 +95,15 @@ export default function ApplicationsPage() {
     [deBouncedSearch, paramsFilter.status, paramsFilter.dateRange],
   );
 
-  const { data: filteredApplication } = useGetFiltersQuery(queryFilter);
+  const { data: filteredApplication , isLoading} = useGetFiltersQuery(queryFilter);
+
+  console.log("filteredApplication", filteredApplication);
 
   useMemo(() => {
     setApplications(
       filteredApplication?.pages.flatMap((page) => page.data ?? []) ?? [],
     );
   }, [filteredApplication?.pages]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setIsLoading(false), 650);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-
 
   const groupedApplications = useMemo(
     () =>
@@ -153,7 +147,10 @@ export default function ApplicationsPage() {
       },
       onError(err) {
         const error = err as AxiosError<{ message: string }>;
-        toast.error(error.response?.data.message || "Unable to delete application. Please try again.");
+        toast.error(
+          error.response?.data.message ||
+            "Unable to delete application. Please try again.",
+        );
       },
     });
   }
@@ -238,7 +235,7 @@ export default function ApplicationsPage() {
                 >
                   <List className="h-4 w-4" />
                 </button>
-                                <button
+                <button
                   aria-label="Kanban view"
                   className={`grid h-9 w-10 place-items-center rounded-md transition ${view === "kanban" ? "bg-white text-applytrack-primary shadow-sm" : "text-[#77768A] hover:text-applytrack-ink"}`}
                   onClick={() => setView("kanban")}
@@ -297,35 +294,37 @@ export default function ApplicationsPage() {
                 </div>
                 <div className="space-y-3">
                   {groupedApplications[status].length > 0 ? (
-                    groupedApplications[status].map((application  :Application) => (
-                      <ApplicationCard
-                        application={application}
-                        isDragging={draggedId === application._id}
-                        key={application._id}
-                        onDragEnd={() => setDraggedId(null)}
-                        onDragStart={() => setDraggedId(application._id)}
-                        onEdit={() =>
-                          navigate(`/applications/${application._id}/edit`, {
-                            state: { application },
-                          })
-                        }
-                        onAtsService={() =>
-                          navigate(
-                            `/applications/${application._id}/ats-service`,
-                            {
+                    groupedApplications[status].map(
+                      (application: Application) => (
+                        <ApplicationCard
+                          application={application}
+                          isDragging={draggedId === application._id}
+                          key={application._id}
+                          onDragEnd={() => setDraggedId(null)}
+                          onDragStart={() => setDraggedId(application._id)}
+                          onEdit={() =>
+                            navigate(`/applications/${application._id}/edit`, {
                               state: { application },
-                            },
-                          )
-                        }
-                        onDelete={() =>
-                          handleDeleteApplication(application._id)
-                        }
-                        isDeleting={() =>
-                          application._id === deleteMutation.variables &&
-                          deleteMutation.isPending
-                        }
-                      />
-                    ))
+                            })
+                          }
+                          onAtsService={() =>
+                            navigate(
+                              `/applications/${application._id}/ats-service`,
+                              {
+                                state: { application },
+                              },
+                            )
+                          }
+                          onDelete={() =>
+                            handleDeleteApplication(application._id)
+                          }
+                          isDeleting={() =>
+                            application._id === deleteMutation.variables &&
+                            deleteMutation.isPending
+                          }
+                        />
+                      ),
+                    )
                   ) : (
                     <ColumnEmptyState
                       onAdd={() => navigate("/applications/new")}
@@ -337,7 +336,7 @@ export default function ApplicationsPage() {
             ))}
           </div>
         ) : (
-          <SurfaceCard >
+          <SurfaceCard>
             <div className="hidden grid-cols-[1.3fr_0.8fr_0.8fr_0.8fr_1fr_0.6fr_auto] gap-4 border-b border-[#EEF0F5] bg-[#FAFBFF] px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[#77768A] lg:grid">
               <span>Role</span>
               <span>Status</span>
@@ -379,12 +378,19 @@ export default function ApplicationsPage() {
                   <p className="text-sm font-semibold text-applytrack-ink">
                     {application?.matchResult?.matchScore ?? 0}%
                   </p>
-                  <div className="relative flex items-center lg:justify-end" ref={menuRef}>
+                  <div
+                    className="relative flex items-center lg:justify-end"
+                    ref={menuRef}
+                  >
                     <button
                       aria-label="Open application menu"
                       className="grid h-9 w-9 place-items-center rounded-lg border border-[#E1E3EC] bg-white text-[#646378] transition hover:border-applytrack-outline hover:bg-applytrack-surface hover:text-applytrack-primary"
                       onClick={() =>
-                        setOpenMenuId(openMenuId === application._id ? null : application._id)
+                        setOpenMenuId(
+                          openMenuId === application._id
+                            ? null
+                            : application._id,
+                        )
                       }
                       title="Actions"
                       type="button"

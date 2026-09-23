@@ -129,6 +129,8 @@ export default function ApplicationFormPage() {
     });
   } , [Mutation])
 
+  console.log(formData)
+
   return (
     <div className="min-h-svh">
       <PageHeader

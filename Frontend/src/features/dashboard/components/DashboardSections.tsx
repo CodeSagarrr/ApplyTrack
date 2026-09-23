@@ -355,7 +355,7 @@ export function RecentApplications({
                     </StatusBadge>
                   </td>
                   <td className="whitespace-nowrap px-5 py-4 font-semibold text-applytrack-ink">
-                    {application.matchScore}
+                    {application.matchScore ?? 0}
                   </td>
                   <td className="whitespace-nowrap px-5 py-4 text-[#646378]">
                     {formatDate(application.createdAt)}
