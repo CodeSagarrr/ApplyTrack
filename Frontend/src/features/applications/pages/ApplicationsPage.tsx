@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Archive,
   CalendarDays,
@@ -82,26 +82,65 @@ export default function ApplicationsPage() {
   const deBouncedSearch = useDebounce(paramsFilter.search, 500);
   const { from, to } = getDate(paramsFilter.dateRange);
 
-  const queryFilter = useMemo(
-    () => ({
-      search: deBouncedSearch,
-      status:
-        paramsFilter.status === "All statuses"
-          ? undefined
-          : paramsFilter.status,
-      from: from,
-      to: to,
-    }),
-    [deBouncedSearch, paramsFilter.status, paramsFilter.dateRange],
-  );
+  // Track the currently rendered cursor page separately from the filters so the user can move through already-fetched pages without resetting the filter state.
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const { data: filteredApplication , isLoading} = useGetFiltersQuery(queryFilter);
+  const queryFilter = {
+    search: deBouncedSearch,
+    status:
+      paramsFilter.status === "All statuses" ? undefined : paramsFilter.status,
+    from: from,
+    to: to,
+  };
 
-  useMemo(() => {
-    setApplications(
-      filteredApplication?.pages.flatMap((page) => page.data ?? []) ?? [],
-    );
-  }, [filteredApplication?.pages]);
+  // Read the server's infinite-query metadata directly so the visible page follows the cursor-based data instead of every fetched page being flattened together.
+  const {
+    data: filteredApplication,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetFiltersQuery(queryFilter);
+
+  console.log("filteredApplication", filteredApplication);
+
+  // Reset the cursor page whenever filters change so the first page of the updated result set is shown again.
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [deBouncedSearch, paramsFilter.status, from, to]);
+
+  // Show only the data for the active cursor page while still allowing the user to move through already-fetched pages.
+  const currentPageApplications =
+    filteredApplication?.pages[currentPage]?.data ?? [];
+  const totalFetchedPages = filteredApplication?.pages.length ?? 0;
+  const currentRangeStart = currentPage * 6 + 1;
+  const currentRangeEnd =
+    currentPageApplications.length > 0
+      ? currentRangeStart + currentPageApplications.length - 1
+      : currentPage * 6;
+  const canGoPrevious = currentPage > 0;
+  const canGoNext = currentPage < totalFetchedPages - 1 || hasNextPage;
+
+  function handlePreviousPage() {
+    if (!canGoPrevious) return;
+    setCurrentPage((page) => Math.max(0, page - 1));
+  }
+
+  async function handleNextPage() {
+    if (currentPage < totalFetchedPages - 1) {
+      setCurrentPage((page) => page + 1);
+      return;
+    } // when me make previous click and then next click we need to fetch next page from backend and then set current page to next page
+
+    if (!hasNextPage) return;
+
+    await fetchNextPage();
+    setCurrentPage((page) => page + 1);
+  }
+
+  // Keep the table state limited to the active cursor page so the list does not accumulate prior pages or duplicate records.
+  useEffect(() => {
+    setApplications(filteredApplication?.pages[currentPage]?.data ?? []);
+  }, [currentPage, filteredApplication?.pages]);
 
   const groupedApplications = useMemo(
     () =>
@@ -345,7 +384,7 @@ export default function ApplicationsPage() {
               <span className="text-right">Actions</span>
             </div>
             <div className="divide-y divide-[#EEF0F5]">
-              {applications.map((application) => (
+              {currentPageApplications.map((application: Application) => (
                 <article
                   className="grid gap-4 p-5 transition hover:bg-[#FAFBFF] lg:grid-cols-[1.3fr_0.8fr_0.8fr_0.8fr_1fr_0.6fr_auto] lg:items-center"
                   key={application._id}
@@ -454,6 +493,31 @@ export default function ApplicationsPage() {
                   </div>
                 </article>
               ))}
+            </div>
+
+            {/* Render the cursor-based page summary beneath the list so the table still keeps its original styling and actions. */}
+            <div className="flex items-center justify-between border-t border-[#EEF0F5] bg-[#FAFBFF] px-5 py-3 text-sm text-[#646378]">
+              <p className="font-medium">
+                Showing {currentRangeStart} – {currentRangeEnd}
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:text-[#B5B4C1] hover:text-applytrack-primary disabled:hover:text-[#B5B4C1]"
+                  disabled={!canGoPrevious}
+                  onClick={handlePreviousPage}
+                  type="button"
+                >
+                  ← Previous
+                </button>
+                <button
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:text-[#B5B4C1] hover:text-applytrack-primary disabled:hover:text-[#B5B4C1]"
+                  disabled={!canGoNext}
+                  onClick={handleNextPage}
+                  type="button"
+                >
+                  Next →
+                </button>
+              </div>
             </div>
           </SurfaceCard>
         )}

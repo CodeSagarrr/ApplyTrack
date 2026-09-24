@@ -69,7 +69,7 @@ api.interceptors.response.use(
   }
 );
 export const getUserApi = async() => {
-  const { data } = await api.get("/users/me" , { withCredentials : true });
+  const { data } = await api.get("/users/me" );
 
   return data
 }
@@ -87,7 +87,7 @@ export const login = async (payLoad: LoginProps) => {
 };
 
 export const Logout = async () => {
-  const { data } = await api.post("/auth/logout" , { withCredentials : true });
+  const { data } = await api.post("/auth/logout" );
 
   return data;
 };
@@ -101,12 +101,12 @@ export const googleLogin = async (credentialId: string) => {
 // Profile
 
 export const createProfile = async (payLoad: FormProps) => {
-  const { data } = await api.patch("/users/profile", payLoad , { withCredentials : true });
+  const { data } = await api.patch("/users/profile", payLoad );
   return data;
 };
 
 export const getProfileData = async () => {
-  const { data } = await api.get("/users/profile" , { withCredentials : true });
+  const { data } = await api.get("/users/profile" );
 
   return data;
 };
@@ -117,7 +117,7 @@ export const uploadResume = async (payLoad: {
   file: File;
   versionName: string;
 }) => {
-  const { data } = await api.post("/v1/resumes", payLoad , { withCredentials : true });
+  const { data } = await api.post("/v1/resumes", payLoad );
 
   return data;
 };
@@ -126,22 +126,22 @@ export const updateResumeDetails = async (
   id: string | undefined,
   payLoad: { versionName?: string; file?: File },
 ) => {
-  const { data } = await api.patch(`/v1/resumes/${id}/details`, payLoad , { withCredentials : true });
+  const { data } = await api.patch(`/v1/resumes/${id}/details`, payLoad );
   return data;
 };
 
 export const updateResumeStatus = async (id: string) => {
-  const { data } = await api.patch(`/v1/resumes/${id}/status` , { withCredentials : true });
+  const { data } = await api.patch(`/v1/resumes/${id}/status` );
   return data;
 };
 
 export const getResumeApi = async () => {
-  const { data } = await api.get("/v1/resumes" , { withCredentials : true });
+  const { data } = await api.get("/v1/resumes" );
   return data;
 };
 
 export const getResumeByIdApi = async (id: string) => {
-  const { data } = await api.get(`/v1/resumes/${id.trim()}` , { withCredentials : true });
+  const { data } = await api.get(`/v1/resumes/${id.trim()}` );
   return data;
 };
 
@@ -182,32 +182,33 @@ export interface updateApplicationsParams {
 }
 
 export const createApplicationApi = async (payLoad: ApplicationApiProps) => {
-  const { data } = await api.post("/v1/applications", payLoad , { withCredentials : true });
+  const { data } = await api.post("/v1/applications", payLoad );
 
   return data;
 };
 
 export const getApplicationsApi = async () => {
-  const { data } = await api.get("/v1/applications/all" , { withCredentials : true });
+  const { data } = await api.get("/v1/applications/all" );
 
   return data;
 };
 
 export const getApplicationByIdApi = async (id: string) => {
-  const { data } = await api.get(`/v1/applications/${id.trim()}` , { withCredentials : true });
+  const { data } = await api.get(`/v1/applications/${id.trim()}` );
 
   return data;
 };
 
+// Send the active cursor value with the backend's expected query key so each page request fetches exactly the next cursor slice.
 export const getFiltersApplicationsApi = async (
   params: GetApplicationsParams,
   pageParams: string | null,
 ) => {
   const searchParams = BuildSearchParams({
     ...params,
-    ...(pageParams ? { cursorId: pageParams } : {}), // omit if null → first page
+    ...(pageParams ? { cursor: pageParams } : {}),
   });
-  const { data } = await api.get(`/v1/applications?${searchParams.toString()}` , { withCredentials : true });
+  const { data } = await api.get(`/v1/applications?${searchParams.toString()}`);
   return data;
 };
 
@@ -215,12 +216,12 @@ export const updateApplicationForm = async (
   id: string,
   payLoad: updateApplicationsParams,
 ) => {
-  const { data } = await api.patch(`/v1/applications/${id.trim()}`, payLoad , { withCredentials : true });
+  const { data } = await api.patch(`/v1/applications/${id.trim()}`, payLoad );
   return data;
 };
 
 export const deleteApplicationApi = async (id: string) => {
-  const { data } = await api.delete(`/v1/applications/${id.trim()}` , { withCredentials : true });
+  const { data } = await api.delete(`/v1/applications/${id.trim()}` );
   return data;
 };
 
@@ -237,13 +238,13 @@ export const createMatchJob = async (payLoad: {
   resumeId: string;
   jd_text: string;
 }) => {
-  const { data } = await api.post(`/v1/match`, payLoad , { withCredentials : true });
+  const { data } = await api.post(`/v1/match`, payLoad );
 
   return data;
 };
 
 export const getMatchJobId = async(id : string) => {
-  const { data } = await api.get(`/v1/match/${id.trim()}` , { withCredentials : true });
+  const { data } = await api.get(`/v1/match/${id.trim()}` );
 
   return data;
 }
@@ -251,7 +252,7 @@ export const getMatchJobId = async(id : string) => {
 // Dasboard
 
 export const getDasboardSummary = async() => {
-  const { data } = await api.get("/dashboard/summary" , { withCredentials : true })
+  const { data } = await api.get("/dashboard/summary" )
 
   return data;
 }
