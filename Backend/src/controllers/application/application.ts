@@ -128,7 +128,7 @@ export const getFiltersApplication = async (
   try {
     const { userId } = req as AuthUserId;
     const { status, from, to, search, cursor } = req.query;
-    const limit = 3;
+    const limit = 6;
 
     const filters: QueryFilter<IQueryFilters> = {
       user: new mongoose.Types.ObjectId(userId),
@@ -143,7 +143,12 @@ export const getFiltersApplication = async (
     }
 
     if (search) {
-      filters.$text = { $search: search as string };
+      filters.$or = [
+        { companyName: { $regex: `^${search}`, $options: "i" } },
+        { roleTitle: { $regex: `^${search}`, $options: "i" } },
+        { location: { $regex: `^${search}`, $options: "i" } },
+        { contact: { $regex: `^${search}`, $options: "i" } },
+      ];
     }
 
     if (from || to) {
@@ -198,7 +203,7 @@ export const getFiltersApplication = async (
       { $unwind: { path: "$matchResult", preserveNullAndEmptyArrays: true } },
     ];
 
-    const filtersApplications = await Application.aggregate(pipeline);
+    const filtersApplications = await Application.aggregate(pipeline)
 
     if (!filtersApplications || filtersApplications.length === 0) {
       throw new ApiError(404, "Not found!");
