@@ -101,8 +101,6 @@ export default function ApplicationsPage() {
     hasNextPage,
   } = useGetFiltersQuery(queryFilter);
 
-  console.log("filteredApplication", filteredApplication);
-
   // Reset the cursor page whenever filters change so the first page of the updated result set is shown again.
   useEffect(() => {
     setCurrentPage(0);
