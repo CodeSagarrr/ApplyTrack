@@ -1,4 +1,9 @@
-import { type Request, type Response, type NextFunction, application } from "express";
+import {
+  type Request,
+  type Response,
+  type NextFunction,
+  application,
+} from "express";
 import { Application } from "../../models/application.model.js";
 import ApiError from "../../utils/ApiError.js";
 import { Resume } from "../../models/resume.model.js";
@@ -7,149 +12,144 @@ import { MatchJob } from "../../models/matchJob.model.js";
 import { aiAtsService } from "../../config/langChain/atsAnalyzer.js";
 import { MatchResult } from "../../models/matchResults.model.js";
 
+export const createMatch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { userId } = req as AuthUserId;
+    const { resumeId, jd_text } = req.body;
 
-export const createMatch = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { userId } = req as AuthUserId
-        const { resumeId, jd_text, applicationId } = req.body;
+    if (!(resumeId && jd_text)) {
+      throw new ApiError(400, "Invalid request.");
+    }
 
-        if (
-            !applicationId &&
-            !(resumeId && (jd_text))
-        ) {
-            throw new ApiError(400, "Invalid request.");
-        }
+    let resumeParsedText: string | null = null;
 
-        let resumeParsedText: string | null = null;
-        let jobDescription: string | null = null;
+    const resume = await Resume.findById(resumeId)
+      .select("parsedText")
+      .orFail(() => new ApiError(404, "Application cant find resume"));
 
-        if (applicationId) {
-            const application = await Application.findById(applicationId)
-                .select("jd_text")
-                .populate<{ resume: { parsedText: string } }>("resume")
-                .orFail(() => new ApiError(404, "Application cant find resume"));
+    resumeParsedText = resume.parsedText;
 
-            resumeParsedText = application.resume?.parsedText ?? null;
-            jobDescription = application.jd_text ?? null;
+    const result = await MatchJob.create({
+      user: userId!,
+      resume: resumeId ? resumeId : null,
+    });
 
-        } else if (resumeId && jd_text) {
-            const resume = await Resume.findById(resumeId)
-                .select("parsedText")
-                .orFail(() => new ApiError(404, "Application cant find resume"));
+    res.status(201).json({
+      success: true,
+      data: {
+        jobId: result.id,
+        status: result.status,
+      },
+    });
 
-            resumeParsedText = resume.parsedText;
-            jobDescription = jd_text;
-        }
+    await MatchJob.findByIdAndUpdate(result.id, {
+      status: "PROCESSING",
+    }).lean();
 
-        const result = await MatchJob.create({
+    setImmediate(async () => {
+      try {
+        const aiResult = await aiAtsService(
+          resumeParsedText ?? "",
+          jd_text ?? "",
+        );
+        const matchResult = await MatchResult.findOneAndUpdate(
+          {
             user: userId!,
-            application: applicationId ? applicationId : null,
-            resume: resumeId ? resumeId : null
-        });
+            resume: resumeId,
+          },
+          { ...aiResult },
+          {
+            new: true,
+            upsert: true,
+          },
+        ).lean();
 
-        res.status(201).json({
-            success: true,
-            data: {
-                jobId: result.id,
-                status: result.status,
-            }
-        });
+        await MatchJob.findByIdAndUpdate(
+          result.id,
+          { status: "COMPLETED", matchResult: matchResult._id },
+          { new: true, runValidators: true },
+        ).lean();
+      } catch (error: any) {
+        console.error(error);
 
         await MatchJob.findByIdAndUpdate(result.id, {
-            status: "PROCESSING"
-        });
+          status: "FAILED",
+          error: error.message,
+        }).lean();
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
 
-        setImmediate(async () => {
-            try {
-                const aiResult = await aiAtsService(resumeParsedText ?? "", jobDescription ?? "");
-                const matchResult = await MatchResult.findOneAndUpdate(
-                    {
-                        application: applicationId,
-                        resume: resumeId
-                    },
-                    { ...aiResult },
-                    {
-                        new: true,
-                        upsert: true
-                    }
-                ).lean();
+export const getMatchJobId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { jobId }: { jobId?: string } = req.params;
+    const { userId } = req as AuthUserId;
 
-                await MatchJob.findByIdAndUpdate(
-                    result.id,
-                    { status: "COMPLETED", matchResult : matchResult._id },
-                    { new: true, runValidators: true }
-                ).lean()
-
-            } catch (error: any) {
-                console.error(error)
-
-                await MatchJob.findByIdAndUpdate(result.id, {
-                    status: "FAILED",
-                    error: error.message
-                });
-
-            }
-        })
-
-    } catch (error) {
-        console.log(error)
-        next(error)
+    if (!jobId) {
+      throw new ApiError(400, "JobId is required");
     }
-}
 
-export const getMatchJobId = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { jobId }: { jobId?: string } = req.params;
-        const { userId } = req as AuthUserId
+    const result = await MatchJob.findById(jobId).select(
+      "status user matchResult error",
+    ).lean();
 
-        if (!jobId) {
-            throw new ApiError(400, "JobId is required")
-        }
-
-        const result = await MatchJob.findById(jobId)
-            .select("status user matchResult error")
-
-        if (!result) {
-            throw new ApiError(404, "Match job not found")
-        }
-
-        if (String(result?.user) !== userId) {
-            throw new ApiError(403, "MatchJob belongs to anothe user!")
-        }
-
-        if (!result.matchResult) {
-            throw new ApiError(404, "Match results is failed!")
-        }
-
-        let data
-
-        if (result?.status === "COMPLETED") {
-            data = await MatchResult.findOne(result.matchResult).select("id matchScore matched_keywords missing_keywords suggestions atsIssues").lean()
-        }
-
-        if (result.status === "COMPLETED" && !data) {
-            throw new ApiError(500, "Match result not found.");
-        }
-
-        if (result.status === "FAILED" && !data) {
-            return res.status(400).json({
-                success: false,
-                data: {
-                    status: result.status,
-                    error: result.error ?? null
-                }
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                status: result.status,
-                result: data ?? null,
-            }
-        });
-    } catch (error) {
-        console.log(error)
-        next(error)
+    if (!result) {
+      throw new ApiError(404, "Match job not found");
     }
-}
+
+    if (String(result?.user) !== userId) {
+      throw new ApiError(403, "MatchJob belongs to anothe user!");
+    }
+
+    if (!result.matchResult) {
+      throw new ApiError(404, "Match results is failed!");
+    }
+
+    let data;
+
+    if (result?.status === "COMPLETED") {
+      data = await MatchResult.findOne(result.matchResult)
+        .select(
+          "id matchScore matched_keywords missing_keywords suggestions atsIssues",
+        )
+        .lean();
+    }
+
+    if (result.status === "COMPLETED" && !data) {
+      throw new ApiError(500, "Match result not found.");
+    }
+
+    if (result.status === "FAILED" && !data) {
+      return res.status(400).json({
+        success: false,
+        data: {
+          status: result.status,
+          error: result.error ?? null,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        status: result.status,
+        result: data ?? null,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
