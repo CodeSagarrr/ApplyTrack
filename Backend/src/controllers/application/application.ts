@@ -203,16 +203,14 @@ export const getFiltersApplication = async (
       { $unwind: { path: "$matchResult", preserveNullAndEmptyArrays: true } },
     ];
 
-    const filtersApplications = await Application.aggregate(pipeline)
+    const filtersApplications = await Application.aggregate(pipeline);
 
     if (!filtersApplications || filtersApplications.length === 0) {
       throw new ApiError(404, "Not found!");
     }
 
     const hasNextPage = filtersApplications.length > Number(limit);
-    if (hasNextPage) {
-      filtersApplications.pop();
-    }
+    hasNextPage && filtersApplications.pop();
     const cursorId =
       filtersApplications.length > 0 && hasNextPage
         ? filtersApplications[filtersApplications.length - 1]?._id
