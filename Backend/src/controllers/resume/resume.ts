@@ -218,7 +218,7 @@ export const deleteResume = async (
       resume : id!,
       user: userId as string,
       status: {
-        $in: ["Applied", "Screening", "Interview", "Offer"],
+        $in: ["Applied", "Saved", "Interview", "Offer"],
       },
     })
 
