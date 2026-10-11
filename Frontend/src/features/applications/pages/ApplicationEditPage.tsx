@@ -49,7 +49,7 @@ const emptyFormValues: ApplicationEditFormValues = {
   resume: "",
   jd_URL: "",
   notes: "",
-  status: "Applied",
+  status: "Saved",
 };
 
 const editFields: ApplicationEditFieldProps[] = [
@@ -299,10 +299,10 @@ export default function ApplicationEditPage() {
                 >
                   <option value="">Select status for resume</option>
                   {[
+                    "Saved",
                     "Applied",
                     "Interview",
                     "Offer",
-                    "Screening",
                     "Rejected",
                   ].map((status, index) => (
                     <option key={index} value={status}>

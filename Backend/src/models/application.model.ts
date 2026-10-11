@@ -56,12 +56,12 @@ const ApplicationSchema = new mongoose.Schema(
       type: String,
       enum: [
         "Applied",
-        "Screening",
+        "Saved",
         "Interview",
         "Offer",
         "Rejected",
       ],
-      default: "Applied",
+      default: "Saved",
     },
     dateApplied: {
       type: Date,

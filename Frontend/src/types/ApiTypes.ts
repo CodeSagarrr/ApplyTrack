@@ -142,7 +142,7 @@ export type ApplicationEditFormValues = {
   resume: string;
   jd_URL: string;
   notes: string;
-  status:"Applied" | "Interview" | "Offer" | "Screening" | "Rejected";
+  status:"Applied" | "Interview" | "Offer" | "Saved" | "Rejected";
 };
 
 // Small field contract used to keep application edit inputs consistent.
@@ -155,10 +155,10 @@ export type ApplicationEditFieldProps = {
 };
 
 export type ApplicationStatus =
+    "Saved"
   | "Applied"
   | "Interview"
   | "Offer"
-  | "Screening"
   | "Rejected";
 
 export type Application = {
@@ -197,7 +197,7 @@ export type initialParamsFiltersTypes = {
 
 // dashboard
 export interface IPipeline {
-  _id : "Interview" | "Applied" | "Screening" | "Rejected" | "Offer";
+  _id : "Interview" | "Applied" | "Saved" | "Rejected" | "Offer";
   count : number
 }
 

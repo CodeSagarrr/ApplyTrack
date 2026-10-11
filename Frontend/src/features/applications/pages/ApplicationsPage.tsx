@@ -45,10 +45,10 @@ import toast from "react-hot-toast";
 import { queryClient } from "../../../lib/queryClient";
 
 export const statuses: ApplicationStatus[] = [
+  "Saved",
   "Applied",
   "Interview",
   "Offer",
-  "Screening",
   "Rejected",
 ];
 
@@ -56,10 +56,10 @@ export const statusTone: Record<
   ApplicationStatus,
   "purple" | "blue" | "green" | "amber" | "neutral"
 > = {
+  Saved: "amber",
   Applied: "purple",
   Interview: "blue",
   Offer: "green",
-  Screening: "amber",
   Rejected: "amber",
 };
 
