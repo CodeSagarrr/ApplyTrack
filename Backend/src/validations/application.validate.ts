@@ -22,7 +22,7 @@ export const ValidateApplicationUpdation = zod.object({
         contact : zod.string().trim().optional(),
         jd_URL: zod.string().trim().optional(),
         platForm: zod.string({ error : "Platform is required"}).trim().optional(),
-        status: zod.string().trim().optional(),
+        status: zod.enum(["Applied", "Saved", "Interview", "Offer", "Rejected"]).optional(),
         dateApplied: zod.string().optional(),
         notes: zod.string().trim().optional(),
         resume : zod.string().trim().optional(),
