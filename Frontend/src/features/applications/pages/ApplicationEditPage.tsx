@@ -188,7 +188,6 @@ export default function ApplicationEditPage() {
     setFormData((current) => ({ ...current, [name]: value }));
   }
 
-  console.log(formData)
   function handleFormEdit(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();

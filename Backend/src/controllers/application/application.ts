@@ -175,6 +175,8 @@ export const getFiltersApplication = async (
           createdAt: 1,
           updatedAt: 1,
           contact: 1,
+          jd_text: 1,
+          jd_URL: 1,
           location: 1,
           notes: 1,
           resume: 1,
