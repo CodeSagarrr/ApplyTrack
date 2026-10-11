@@ -49,7 +49,7 @@ function getStatusTone(status: string): BadgeTone {
   if (status === "Interview") {
     return "green";
   }
-  if (status === "Screening") {
+  if (status === "Saved") {
     return "blue";
   }
   return "purple";
