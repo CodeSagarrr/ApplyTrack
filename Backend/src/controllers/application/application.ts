@@ -9,7 +9,7 @@ import { aiAtsService } from "../../config/langChain/atsAnalyzer.js";
 import { MatchResult } from "../../models/matchResults.model.js";
 import mongoose from "mongoose";
 
-type IStatus = "Applied" | "Screening" | "Interview" | "Offer" | "Rejected";
+type IStatus = "Applied" | "Saved" | "Interview" | "Offer" | "Rejected";
 
 interface IQueryFilters {
   status: IStatus;
