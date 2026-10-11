@@ -31,7 +31,7 @@ type ChartPoint = {
 
 const fallbackPipelineDemo: IPipeline[] = [
   { _id: "Applied", count: 14 },
-  { _id: "Screening", count: 7 },
+  { _id: "Saved", count: 7 },
   { _id: "Interview", count: 5 },
   { _id: "Offer", count: 2 },
   { _id: "Rejected", count: 3 },
@@ -39,7 +39,7 @@ const fallbackPipelineDemo: IPipeline[] = [
 
 const pipelineColors: Record<IPipeline["_id"], string> = {
   Applied: "#3525CD",
-  Screening: "#006591",
+  Saved: "#006591",
   Interview: "#047857",
   Offer: "#B45309",
   Rejected: "#77768A",
@@ -65,7 +65,7 @@ function getPipelineTone(tone: string) {
     case "interview":
       toneColour = "bg-[#047857]";
       break;
-    case "screening":
+    case "saved":
       toneColour = "bg-[#006591]";
       break;
     case "offer":
