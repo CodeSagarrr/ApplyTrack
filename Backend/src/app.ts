@@ -1,11 +1,13 @@
 import dns from 'dns'
 dns.setServers(['1.1.1.1', '8.8.8.8']);
+import "./intrument.js"
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/Database.js"
 import cors from "cors";
 import cloudinary from "cloudinary";
+import * as Sentry from "@sentry/node";
 
 import authRoutes from "./routes/auth.user.routes.js"
 import userRoutes from "./routes/user.routes.js"
@@ -28,16 +30,16 @@ cloudinary.v2.config({
 })
 
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || "https://apply-track-tau.vercel.app",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
     optionsSuccessStatus: 200
 }
 
-app.set("trust proxy", 1);
 app.use(cors(corsOptions))
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
 
 app.get("/api/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
@@ -51,4 +53,5 @@ app.use("/api/v1" , matchRoutes)
 app.use("/api/dashboard" , dashboardRoutes)
 
 app.use(errorHandler);
+
 export default app 
